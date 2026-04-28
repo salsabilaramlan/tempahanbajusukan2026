@@ -19,11 +19,11 @@
     --navy: #0d1b2a;
     --gold: #f7c948;
     --gold-dark: #d4a800;
-    --alpha: #2563a8;
-    --beta: #c0392b;
-    --gamma: #16a34a;
-    --delta: #7c3aed;
-    --sigma: #d97706;
+    --alpha: #c0392b;
+    --beta: #2563a8;
+    --gamma: #eab308;
+    --delta: #16a34a;
+    --sigma: #7c3aed;
     --radius: 10px;
     --radius-lg: 14px;
   }
@@ -309,6 +309,16 @@
   .all-btn:hover:not(.active) { background: var(--border); }
 
   .empty { padding: 2rem; text-align: center; color: var(--text3); font-size: 13px; }
+  .filter-btn {
+    font-size: 11px; padding: 4px 12px; border-radius: 20px;
+    background: var(--surface2); color: var(--text2);
+    cursor: pointer; border: 1px solid var(--border);
+    font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all 0.15s;
+  }
+  .filter-btn:hover:not(.active) { background: var(--border); }
+  .filter-btn.active.f-semua { background: var(--navy); color: white; border-color: var(--navy); }
+  .filter-btn.active.f-bayar { background: #16a34a; color: white; border-color: #16a34a; }
+  .filter-btn.active.f-belum { background: #dc2626; color: white; border-color: #dc2626; }
 
   @media(max-width: 700px) {
     .stat-row { grid-template-columns: repeat(2,1fr); }
@@ -363,8 +373,8 @@
   <div class="stat-row">
     <div class="stat-box"><div class="s-lbl">Jumlah Pelajar</div><div class="s-val" id="st-pelajar">—</div><div class="s-sub">orang</div></div>
     <div class="stat-box"><div class="s-lbl">Jumlah Unit</div><div class="s-val" id="st-unit">—</div><div class="s-sub">helai</div></div>
-    <div class="stat-box"><div class="s-lbl">Bilangan Kelas</div><div class="s-val" id="st-kelas">—</div><div class="s-sub">kelas</div></div>
-    <div class="stat-box"><div class="s-lbl">Jumlah Bayaran</div><div class="s-val" id="st-bayaran">—</div><div class="s-sub">RM</div></div>
+    <div class="stat-box" style="--accent:#16a34a"><div class="s-lbl">Sudah Bayar</div><div class="s-val" id="st-bayar" style="color:#16a34a">—</div><div class="s-sub" id="st-bayar-sub">orang</div></div>
+    <div class="stat-box" style="--accent:#dc2626"><div class="s-lbl">Belum Bayar</div><div class="s-val" id="st-belum" style="color:#dc2626">—</div><div class="s-sub" id="st-belum-sub">orang</div></div>
   </div>
 
   <div class="charts-row">
@@ -405,14 +415,19 @@
           <span id="murid-title">Senarai Pelajar — Semua Kelas</span>
           <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace" id="murid-count"></span>
         </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <button class="filter-btn active" id="f-semua" onclick="filterBayar('semua')">Semua</button>
+          <button class="filter-btn" id="f-bayar" onclick="filterBayar('bayar')">&#10003; Sudah Bayar</button>
+          <button class="filter-btn" id="f-belum" onclick="filterBayar('belum')">&#x2715; Belum Bayar</button>
+        </div>
         <div class="murid-wrap">
           <table class="murid-tbl">
             <colgroup>
-              <col style="width:28%"><col style="width:15%"><col style="width:9%">
-              <col style="width:18%"><col style="width:13%"><col style="width:8%">
+              <col style="width:26%"><col style="width:14%"><col style="width:8%">
+              <col style="width:16%"><col style="width:12%"><col style="width:7%"><col style="width:11%">
             </colgroup>
-            <thead><tr><th>Nama</th><th>Kelas</th><th>Saiz</th><th>Jenis</th><th>Rumah</th><th>Qty</th></tr></thead>
-            <tbody id="murid-body"><tr><td colspan="6" class="empty">Belum ada data</td></tr></tbody>
+            <thead><tr><th>Nama</th><th>Kelas</th><th>Saiz</th><th>Jenis</th><th>Rumah</th><th>Qty</th><th>Bayaran</th></tr></thead>
+            <tbody id="murid-body"><tr><td colspan="7" class="empty">Belum ada data</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -425,8 +440,8 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycby6PwVunaqHQ8ouNuUWBgPs9sSPkD-oooUxmmOJNK6Mr4StI8zmXzq64CoezFi7GdA2VQ/exec';
 
 const RUMAH_CLR = {
-  'ALPHA':'#2563a8','BETA':'#c0392b','GAMMA':'#16a34a',
-  'DELTA':'#7c3aed','SIGMA':'#d97706','OMEGA':'#0891b2'
+  'ALPHA':'#c0392b','BETA':'#2563a8','GAMMA':'#ca8a04',
+  'DELTA':'#16a34a','SIGMA':'#7c3aed','OMEGA':'#0891b2'
 };
 const SAIZ_ORDER = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
 
@@ -442,7 +457,7 @@ function mapRow(r) {
     jenis: (r['JENIS'] || '').toString().trim(),
     rumah: (r['RUMAH SUKAN'] || r['RUMAH'] || '').toString().toUpperCase().trim(),
     kuantiti: parseInt(r['KUANTITI']) || 1,
-    bayaran:  parseFloat((r['BAYARAN'] || '0').toString().replace(/[^0-9.]/g,'')) || 0
+    bayaran: r['BAYARAN'] !== undefined && r['BAYARAN'] !== null && r['BAYARAN'].toString().trim() === '1'
   };
 }
 
@@ -450,11 +465,14 @@ function countBy(arr,k){ return arr.reduce((a,r)=>{ a[r[k]]=(a[r[k]]||0)+1; retu
 function sumBy(arr,k,v){ return arr.reduce((a,r)=>{ a[r[k]]=(a[r[k]]||0)+(r[v]||0); return a; },{}); }
 
 function renderStats(d) {
+  const sudah = d.filter(r=>r.bayaran).length;
+  const belum  = d.length - sudah;
   document.getElementById('st-pelajar').textContent = d.length;
   document.getElementById('st-unit').textContent    = d.reduce((s,r)=>s+r.kuantiti,0);
-  document.getElementById('st-kelas').textContent   = new Set(d.map(r=>r.kelas)).size;
-  const tb = d.reduce((s,r)=>s+r.bayaran,0);
-  document.getElementById('st-bayaran').textContent = tb>0 ? 'RM '+tb.toLocaleString('ms-MY',{minimumFractionDigits:2}) : '—';
+  document.getElementById('st-bayar').textContent   = sudah;
+  document.getElementById('st-bayar-sub').textContent = sudah + ' / ' + d.length + ' orang';
+  document.getElementById('st-belum').textContent   = belum;
+  document.getElementById('st-belum-sub').textContent = Math.round(belum/d.length*100||0) + '% belum selesai';
 }
 
 function renderRumah(d) {
@@ -525,13 +543,28 @@ function renderSaiz(d, kelas) {
   document.getElementById('saiz-title').textContent = kelas ? `Rumusan Saiz — ${kelas}` : 'Rumusan Saiz — Semua Kelas';
 }
 
+let activeBayarFilter = 'semua';
+
+function filterBayar(mode) {
+  activeBayarFilter = mode;
+  document.querySelectorAll('.filter-btn').forEach(b=>{ b.classList.remove('active','f-semua','f-bayar','f-belum'); });
+  const btn = document.getElementById('f-'+mode);
+  if(btn){ btn.classList.add('active', 'f-'+mode); }
+  renderMurid(allData, selectedKelas);
+}
+
 function renderMurid(d, kelas) {
-  const f = kelas ? d.filter(r=>r.kelas===kelas) : d;
+  let f = kelas ? d.filter(r=>r.kelas===kelas) : d;
+  if(activeBayarFilter==='bayar') f = f.filter(r=>r.bayaran);
+  else if(activeBayarFilter==='belum') f = f.filter(r=>!r.bayaran);
   document.getElementById('murid-title').textContent = kelas ? `Senarai Pelajar — ${kelas}` : 'Senarai Pelajar — Semua Kelas';
   document.getElementById('murid-count').textContent = f.length + ' orang';
   document.getElementById('murid-body').innerHTML = f.length ? f.map(r=>{
     const c = RUMAH_CLR[r.rumah]||'#888';
     const isPanjang = r.jenis.toLowerCase().includes('panjang');
+    const bayarPill = r.bayaran
+      ? '<span class="pill" style="background:#dcfce7;color:#15803d">&#10003; Bayar</span>'
+      : '<span class="pill" style="background:#fee2e2;color:#b91c1c">&#x2715; Belum</span>';
     return `<tr>
       <td title="${r.nama}">${r.nama}</td>
       <td>${r.kelas}</td>
@@ -539,8 +572,9 @@ function renderMurid(d, kelas) {
       <td><span class="pill" style="background:${isPanjang?'#fef3c7':'#f0fdf4'};color:${isPanjang?'#92400e':'#166534'}">${r.jenis}</span></td>
       <td><span class="pill" style="background:${c}18;color:${c}">${r.rumah}</span></td>
       <td style="text-align:center;font-weight:600;font-family:'DM Mono',monospace">${r.kuantiti}</td>
+      <td style="text-align:center">${bayarPill}</td>
     </tr>`;
-  }).join('') : '<tr><td colspan="6" class="empty">Tiada rekod</td></tr>';
+  }).join('') : '<tr><td colspan="7" class="empty">Tiada rekod</td></tr>';
 }
 
 function selectKelas(k) {
