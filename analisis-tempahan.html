@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analisis Tempahan Baju Sukan 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f3f0;
+    --surface: #ffffff;
+    --surface2: #f0efeb;
+    --border: #e2e0da;
+    --text: #1a1917;
+    --text2: #6b6963;
+    --text3: #9b9790;
+    --navy: #0d1b2a;
+    --gold: #f7c948;
+    --gold-dark: #d4a800;
+    --alpha: #2563a8;
+    --beta: #c0392b;
+    --gamma: #16a34a;
+    --delta: #7c3aed;
+    --sigma: #d97706;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--navy);
+    color: white;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: 58px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar h1 {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: -0.2px;
+  }
+  .topbar-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 1px;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+  .interval-sel {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 7px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    outline: none;
+  }
+  .interval-sel option { color: #1a1a1a; background: white; }
+
+  .ring-wrap { position: relative; width: 34px; height: 34px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: rgba(255,255,255,0.12); stroke-width: 3; }
+  .ring-fg { fill: none; stroke: var(--gold); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .ring-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 10px; font-weight: 600; color: white; font-family: 'DM Mono', monospace; }
+
+  .btn-refresh {
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    border-radius: 7px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-refresh:hover { background: #e8bb30; }
+  .btn-refresh:active { transform: scale(0.97); }
+  .spin { display: inline-block; }
+  .spinning { animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* STATUS */
+  .status-wrap { padding: 0.75rem 1.5rem; }
+  .status-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 14px;
+    font-size: 12px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .s-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #dc2626; }
+  .s-dot.ok { background: #16a34a; }
+  .s-dot.loading { background: #d97706; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .new-badge {
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 20px;
+    margin-left: 4px;
+    animation: pop 0.3s ease;
+  }
+  @keyframes pop { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+
+  /* MAIN */
+  .main { padding: 0 1.5rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+  /* STATS */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent, var(--navy));
+    border-radius: 3px 3px 0 0;
+  }
+  .stat-box:nth-child(1) { --accent: var(--alpha); }
+  .stat-box:nth-child(2) { --accent: var(--gamma); }
+  .stat-box:nth-child(3) { --accent: var(--delta); }
+  .stat-box:nth-child(4) { --accent: var(--gold-dark); }
+  .s-lbl { font-size: 11px; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .s-val { font-size: 28px; font-weight: 600; color: var(--text); letter-spacing: -0.5px; font-family: 'DM Mono', monospace; }
+  .s-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* CHARTS */
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+  }
+  .card-head {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .b-lbl { font-size: 11px; color: var(--text2); width: 52px; flex-shrink: 0; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+  .b-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .b-track { flex: 1; background: var(--surface2); border-radius: 5px; height: 22px; overflow: hidden; }
+  .b-fill { height: 100%; border-radius: 5px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: white; min-width: 4px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .b-num { font-size: 12px; font-weight: 600; color: var(--text); width: 26px; text-align: right; font-family: 'DM Mono', monospace; }
+
+  /* LAYOUT */
+  .layout { display: grid; grid-template-columns: 210px 1fr; gap: 10px; }
+
+  .kelas-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    align-self: start;
+    position: sticky;
+    top: 70px;
+  }
+  .panel-head {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    background: var(--surface2);
+  }
+  .kelas-list { max-height: calc(100vh - 220px); overflow-y: auto; }
+  .kelas-item {
+    padding: 9px 1rem;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.1s;
+    user-select: none;
+  }
+  .kelas-item:last-child { border-bottom: none; }
+  .kelas-item:hover { background: var(--surface2); }
+  .kelas-item.active { background: #eff6ff; color: #1e40af; font-weight: 600; }
+  .kelas-badge {
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+    min-width: 24px;
+    text-align: center;
+  }
+  .kelas-item.active .kelas-badge { background: #1e40af; color: white; }
+
+  .right-panel { display: flex; flex-direction: column; gap: 10px; }
+
+  /* SAIZ TABLE */
+  .saiz-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .saiz-tbl th {
+    text-align: center;
+    padding: 7px 10px;
+    color: var(--text2);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .saiz-tbl th:first-child { text-align: left; }
+  .saiz-tbl td { text-align: center; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  .saiz-tbl td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+  .saiz-tbl tr.total-row td { background: var(--surface2); font-weight: 700; border-bottom: none; border-top: 2px solid var(--border); font-family: 'DM Mono', monospace; }
+  .saiz-tbl td { color: var(--text2); }
+  .saiz-tbl td:last-child { font-weight: 600; color: var(--text); }
+
+  /* MURID TABLE */
+  .murid-wrap { overflow-x: auto; }
+  .murid-tbl { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  .murid-tbl th {
+    text-align: left;
+    padding: 7px 10px;
+    color: var(--text2);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    background: var(--surface2);
+  }
+  .murid-tbl td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .murid-tbl tr:last-child td { border-bottom: none; }
+  .murid-tbl tr:hover td { background: #fafaf9; }
+  .pill {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .all-btn {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--surface2);
+    color: var(--text2);
+    cursor: pointer;
+    border: 1px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .all-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+  .all-btn:hover:not(.active) { background: var(--border); }
+
+  .empty { padding: 2rem; text-align: center; color: var(--text3); font-size: 13px; }
+
+  @media(max-width: 700px) {
+    .stat-row { grid-template-columns: repeat(2,1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    .layout { grid-template-columns: 1fr; }
+    .kelas-panel { position: static; }
+    .topbar { height: auto; padding: 0.75rem 1rem; flex-wrap: wrap; }
+    .main { padding: 0 1rem 2rem; }
+    .status-wrap { padding: 0.75rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-left">
+      <h1>Analisis Tempahan Baju Sukan 2026</h1>
+      <div class="topbar-sub" id="status-txt">Klik Muat Data untuk bermula</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <select class="interval-sel" id="interval-sel" onchange="changeInterval()">
+      <option value="0">Auto refresh: Mati</option>
+      <option value="30">Setiap 30 saat</option>
+      <option value="60" selected>Setiap 1 minit</option>
+      <option value="120">Setiap 2 minit</option>
+      <option value="300">Setiap 5 minit</option>
+    </select>
+    <div class="ring-wrap" id="ring-wrap" style="display:none">
+      <svg width="34" height="34" viewBox="0 0 34 34">
+        <circle class="ring-bg" cx="17" cy="17" r="14"/>
+        <circle class="ring-fg" id="ring-fg" cx="17" cy="17" r="14" stroke-dasharray="87.96" stroke-dashoffset="0"/>
+      </svg>
+      <span class="ring-num" id="ring-num">60</span>
+    </div>
+    <button class="btn-refresh" onclick="loadData()">
+      <span class="spin" id="spin-ico">↻</span> Muat Data
+    </button>
+  </div>
+</div>
+
+<div class="status-wrap">
+  <div class="status-bar">
+    <span class="s-dot" id="s-dot"></span>
+    <span id="s-msg">Belum dimuatkan. Klik "Muat Data" untuk ambil data terkini dari Google Sheets.</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="stat-row">
+    <div class="stat-box"><div class="s-lbl">Jumlah Pelajar</div><div class="s-val" id="st-pelajar">—</div><div class="s-sub">orang</div></div>
+    <div class="stat-box"><div class="s-lbl">Jumlah Unit</div><div class="s-val" id="st-unit">—</div><div class="s-sub">helai</div></div>
+    <div class="stat-box"><div class="s-lbl">Bilangan Kelas</div><div class="s-val" id="st-kelas">—</div><div class="s-sub">kelas</div></div>
+    <div class="stat-box"><div class="s-lbl">Jumlah Bayaran</div><div class="s-val" id="st-bayaran">—</div><div class="s-sub">RM</div></div>
+  </div>
+
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-head">Analisis Rumah Sukan</div>
+      <div id="rumah-chart"><div class="empty">Belum ada data</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head">Jenis Baju (unit)</div>
+      <div id="jenis-chart"><div class="empty">Belum ada data</div></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="kelas-panel">
+      <div class="panel-head">Senarai Kelas</div>
+      <div class="kelas-list" id="kelas-list">
+        <div class="empty">Belum ada data</div>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <div class="card">
+        <div class="card-head">
+          <span id="saiz-title">Rumusan Saiz — Semua Kelas</span>
+          <button class="all-btn active" id="all-btn" onclick="selectAll()">Semua</button>
+        </div>
+        <div class="murid-wrap">
+          <table class="saiz-tbl">
+            <thead><tr><th>Saiz</th><th>Lengan Pendek</th><th>Lengan Panjang</th><th>Jumlah</th></tr></thead>
+            <tbody id="saiz-body"><tr><td colspan="4" class="empty">Belum ada data</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span id="murid-title">Senarai Pelajar — Semua Kelas</span>
+          <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace" id="murid-count"></span>
+        </div>
+        <div class="murid-wrap">
+          <table class="murid-tbl">
+            <colgroup>
+              <col style="width:28%"><col style="width:15%"><col style="width:9%">
+              <col style="width:18%"><col style="width:13%"><col style="width:8%">
+            </colgroup>
+            <thead><tr><th>Nama</th><th>Kelas</th><th>Saiz</th><th>Jenis</th><th>Rumah</th><th>Qty</th></tr></thead>
+            <tbody id="murid-body"><tr><td colspan="6" class="empty">Belum ada data</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycby6PwVunaqHQ8ouNuUWBgPs9sSPkD-oooUxmmOJNK6Mr4StI8zmXzq64CoezFi7GdA2VQ/exec';
+
+const RUMAH_CLR = {
+  'ALPHA':'#2563a8','BETA':'#c0392b','GAMMA':'#16a34a',
+  'DELTA':'#7c3aed','SIGMA':'#d97706','OMEGA':'#0891b2'
+};
+const SAIZ_ORDER = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL'];
+
+let allData = [], selectedKelas = null;
+let intervalId = null, countdownId = null, remaining = 60;
+let prevCount = 0;
+
+function mapRow(r) {
+  return {
+    nama: (r['NAMA (HURUF BESAR)'] || r['NAMA'] || '').toString().toUpperCase().trim(),
+    kelas: (r['KELAS'] || '').toString().toUpperCase().trim(),
+    saiz:  (r['SAIZ']  || '').toString().toUpperCase().trim(),
+    jenis: (r['JENIS'] || '').toString().trim(),
+    rumah: (r['RUMAH SUKAN'] || r['RUMAH'] || '').toString().toUpperCase().trim(),
+    kuantiti: parseInt(r['KUANTITI']) || 1,
+    bayaran:  parseFloat((r['BAYARAN'] || '0').toString().replace(/[^0-9.]/g,'')) || 0
+  };
+}
+
+function countBy(arr,k){ return arr.reduce((a,r)=>{ a[r[k]]=(a[r[k]]||0)+1; return a; },{}); }
+function sumBy(arr,k,v){ return arr.reduce((a,r)=>{ a[r[k]]=(a[r[k]]||0)+(r[v]||0); return a; },{}); }
+
+function renderStats(d) {
+  document.getElementById('st-pelajar').textContent = d.length;
+  document.getElementById('st-unit').textContent    = d.reduce((s,r)=>s+r.kuantiti,0);
+  document.getElementById('st-kelas').textContent   = new Set(d.map(r=>r.kelas)).size;
+  const tb = d.reduce((s,r)=>s+r.bayaran,0);
+  document.getElementById('st-bayaran').textContent = tb>0 ? 'RM '+tb.toLocaleString('ms-MY',{minimumFractionDigits:2}) : '—';
+}
+
+function renderRumah(d) {
+  const list = Object.entries(countBy(d,'rumah')).sort((a,b)=>b[1]-a[1]);
+  const max  = Math.max(...list.map(x=>x[1]),1);
+  document.getElementById('rumah-chart').innerHTML = list.length ? list.map(([r,n])=>`
+    <div class="bar-row">
+      <span class="b-lbl">
+        <span class="b-dot" style="background:${RUMAH_CLR[r]||'#888'}"></span>
+        ${r}
+      </span>
+      <div class="b-track">
+        <div class="b-fill" style="width:${Math.round(n/max*100)}%;background:${RUMAH_CLR[r]||'#888'}">${n}</div>
+      </div>
+      <span class="b-num">${n}</span>
+    </div>`).join('') : '<div class="empty">Tiada data</div>';
+}
+
+function renderJenis(d) {
+  const map  = sumBy(d,'jenis','kuantiti');
+  const list = Object.entries(map);
+  const total= list.reduce((s,x)=>s+x[1],0)||1;
+  const max  = Math.max(...list.map(x=>x[1]),1);
+  const clr  = ['#2563a8','#16a34a','#d97706'];
+  document.getElementById('jenis-chart').innerHTML = list.length ? list.map(([j,n],i)=>`
+    <div class="bar-row" style="margin-bottom:10px">
+      <span class="b-lbl" style="width:90px;text-align:right">${j}</span>
+      <div class="b-track">
+        <div class="b-fill" style="width:${Math.round(n/max*100)}%;background:${clr[i%clr.length]}">${n} unit</div>
+      </div>
+      <span class="b-num" style="width:38px;font-size:11px">${Math.round(n/total*100)}%</span>
+    </div>`).join('') : '<div class="empty">Tiada data</div>';
+}
+
+function renderKelas(d) {
+  const map  = countBy(d,'kelas');
+  const list = Object.keys(map).sort();
+  document.getElementById('kelas-list').innerHTML = list.length ? list.map(k=>`
+    <div class="kelas-item${selectedKelas===k?' active':''}" id="ki-${k.replace(/\s/g,'_')}" onclick="selectKelas('${k}')">
+      <span>${k}</span>
+      <span class="kelas-badge">${map[k]}</span>
+    </div>`).join('') : '<div class="empty">Tiada data</div>';
+}
+
+function renderSaiz(d, kelas) {
+  const f  = kelas ? d.filter(r=>r.kelas===kelas) : d;
+  const sp = {}, sj = {};
+  f.forEach(r=>{
+    const s=r.saiz.replace('XXL','2XL'), q=r.kuantiti;
+    if(r.jenis.toLowerCase().includes('panjang')) sj[s]=(sj[s]||0)+q;
+    else sp[s]=(sp[s]||0)+q;
+  });
+  const all     = [...new Set([...Object.keys(sp),...Object.keys(sj)])];
+  const ordered = SAIZ_ORDER.filter(s=>all.includes(s));
+  const rest    = all.filter(s=>!SAIZ_ORDER.includes(s));
+  let tp=0, tj=0;
+  const rows = [...ordered,...rest].map(s=>{
+    const p=sp[s]||0, j=sj[s]||0; tp+=p; tj+=j;
+    return `<tr>
+      <td>${s}</td>
+      <td>${p||'—'}</td>
+      <td>${j||'—'}</td>
+      <td>${p+j}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('saiz-body').innerHTML = rows +
+    `<tr class="total-row"><td>JUMLAH</td><td>${tp}</td><td>${tj}</td><td>${tp+tj}</td></tr>`;
+  document.getElementById('saiz-title').textContent = kelas ? `Rumusan Saiz — ${kelas}` : 'Rumusan Saiz — Semua Kelas';
+}
+
+function renderMurid(d, kelas) {
+  const f = kelas ? d.filter(r=>r.kelas===kelas) : d;
+  document.getElementById('murid-title').textContent = kelas ? `Senarai Pelajar — ${kelas}` : 'Senarai Pelajar — Semua Kelas';
+  document.getElementById('murid-count').textContent = f.length + ' orang';
+  document.getElementById('murid-body').innerHTML = f.length ? f.map(r=>{
+    const c = RUMAH_CLR[r.rumah]||'#888';
+    const isPanjang = r.jenis.toLowerCase().includes('panjang');
+    return `<tr>
+      <td title="${r.nama}">${r.nama}</td>
+      <td>${r.kelas}</td>
+      <td><span class="pill" style="background:#eff6ff;color:#1e40af">${r.saiz}</span></td>
+      <td><span class="pill" style="background:${isPanjang?'#fef3c7':'#f0fdf4'};color:${isPanjang?'#92400e':'#166534'}">${r.jenis}</span></td>
+      <td><span class="pill" style="background:${c}18;color:${c}">${r.rumah}</span></td>
+      <td style="text-align:center;font-weight:600;font-family:'DM Mono',monospace">${r.kuantiti}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty">Tiada rekod</td></tr>';
+}
+
+function selectKelas(k) {
+  selectedKelas = k;
+  document.querySelectorAll('.kelas-item').forEach(el=>el.classList.remove('active'));
+  const el = document.getElementById('ki-'+k.replace(/\s/g,'_'));
+  if(el) el.classList.add('active');
+  document.getElementById('all-btn').classList.remove('active');
+  renderSaiz(allData,k); renderMurid(allData,k);
+}
+
+function selectAll() {
+  selectedKelas = null;
+  document.querySelectorAll('.kelas-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('all-btn').classList.add('active');
+  renderSaiz(allData,null); renderMurid(allData,null);
+}
+
+function startCountdown(sec) {
+  remaining = sec;
+  const circ = 87.96;
+  const ring = document.getElementById('ring-fg');
+  const num  = document.getElementById('ring-num');
+  document.getElementById('ring-wrap').style.display = 'block';
+  clearInterval(countdownId);
+  countdownId = setInterval(()=>{
+    remaining--;
+    num.textContent = remaining;
+    ring.style.strokeDashoffset = circ*(1-(remaining/sec));
+    if(remaining<=0){ remaining=sec; ring.style.strokeDashoffset=0; }
+  },1000);
+}
+
+function stopCountdown() {
+  clearInterval(countdownId);
+  document.getElementById('ring-wrap').style.display='none';
+}
+
+function changeInterval() {
+  const val = parseInt(document.getElementById('interval-sel').value);
+  clearInterval(intervalId); stopCountdown();
+  if(val===0) return;
+  loadData();
+  intervalId = setInterval(loadData, val*1000);
+  startCountdown(val);
+}
+
+async function loadData() {
+  const ico = document.getElementById('spin-ico');
+  const dot = document.getElementById('s-dot');
+  const msg = document.getElementById('s-msg');
+  ico.classList.add('spinning');
+  dot.className = 's-dot loading';
+  msg.innerHTML = 'Sedang mengambil data dari Google Sheets...';
+
+  try {
+    const res = await fetch(API_URL + '?t=' + Date.now());
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if(!Array.isArray(json)) throw new Error('Format data tidak sah');
+
+    const newData = json.map(mapRow).filter(r=>r.nama);
+    const isNew   = newData.length > prevCount && prevCount > 0;
+    const added   = newData.length - prevCount;
+    prevCount = newData.length;
+    allData   = newData;
+
+    renderStats(allData);
+    renderRumah(allData);
+    renderJenis(allData);
+    renderKelas(allData);
+    renderSaiz(allData, selectedKelas);
+    renderMurid(allData, selectedKelas);
+
+    const now = new Date().toLocaleTimeString('ms-MY');
+    dot.className = 's-dot ok';
+    const badge = isNew ? `<span class="new-badge">+${added} rekod baru</span>` : '';
+    msg.innerHTML = `Data berjaya dimuatkan &mdash; <strong>${allData.length} rekod</strong>${badge} &nbsp;|&nbsp; Dikemaskini: ${now}`;
+    document.getElementById('status-txt').textContent = allData.length + ' rekod | ' + now;
+
+    const sel = parseInt(document.getElementById('interval-sel').value);
+    if(sel>0){ remaining=sel; startCountdown(sel); }
+  } catch(e) {
+    dot.className = 's-dot';
+    dot.style.background = '#dc2626';
+    msg.textContent = 'Gagal muatkan data. Ralat: ' + e.message;
+    document.getElementById('status-txt').textContent = 'Ralat';
+  } finally {
+    ico.classList.remove('spinning');
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
